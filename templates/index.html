@@ -4,30 +4,304 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GemstonesHub Monitor Center</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background: radial-gradient(ellipse at top, #1a1a2e 0%, #0f0f1a 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(24, 24, 40, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .glow-border {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .glow-border::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #f59e0b, #f97316, #f59e0b);
+            background-size: 300% 300%;
+            border-radius: 16px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            z-index: -1;
+            animation: gradientShift 3s ease infinite;
+        }
+        
+        .glow-border:hover::before {
+            opacity: 0.3;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .bot-card {
+            background: linear-gradient(145deg, rgba(30, 30, 50, 0.8), rgba(20, 20, 35, 0.9));
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .bot-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.05), transparent);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        
+        .bot-card:hover::after {
+            opacity: 1;
+        }
+        
+        .bot-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            border-color: rgba(245, 158, 11, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 40px rgba(245, 158, 11, 0.05);
+        }
+        
+        .status-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .loading-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        .btn-respawn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-respawn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-respawn:active {
+            transform: scale(0.95);
+        }
+        
+        .btn-respawn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn-respawn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-offline {
+            background: rgba(63, 63, 70, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .header-icon {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .status-badge-active {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #34d399;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
+        }
+        
+        .status-badge-inactive {
+            background: rgba(113, 113, 122, 0.1);
+            border: 1px solid rgba(113, 113, 122, 0.2);
+            color: #71717a;
+        }
+        
+        .username-text {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .count-badge {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+        
+        .footer-gradient {
+            background: linear-gradient(90deg, rgba(245, 158, 11, 0.1), transparent, rgba(245, 158, 11, 0.1));
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
 </head>
-<body class="bg-zinc-950 text-zinc-100 min-h-screen p-6 font-sans">
+<body class="p-4 md:p-8 font-sans">
 
-    <div class="max-w-5xl mx-auto space-y-6">
-        <div class="flex justify-between items-center bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl">
-            <div>
-                <h1 class="text-3xl font-black tracking-wider text-amber-500 uppercase">GemstonesHub</h1>
-                <p class="text-sm text-zinc-400">Flask & Supabase Hybrid Control Panel</p>
-            </div>
-            <div class="text-xs bg-zinc-950 px-4 py-2 rounded-xl border border-zinc-800 font-mono text-zinc-400">
-                Status: <span class="text-emerald-400 font-bold">Connected</span>
+    <div class="max-w-6xl mx-auto space-y-6">
+        <!-- Header -->
+        <div class="glass-card rounded-3xl p-6 md:p-8 shadow-2xl glow-border relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 left-0 w-48 h-48 bg-orange-500/5 rounded-full blur-3xl"></div>
+            
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20 header-icon">
+                        <i class="fas fa-gem text-2xl text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-black tracking-tight">
+                            <span class="username-text">Gemstones</span><span class="text-zinc-300">Hub</span>
+                        </h1>
+                        <p class="text-sm text-zinc-400 flex items-center gap-2 mt-0.5">
+                            <i class="fas fa-server text-[10px]"></i>
+                            Flask & Supabase Hybrid Control Panel
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-4 flex-wrap">
+                    <div class="flex items-center gap-3 bg-zinc-800/30 px-4 py-2 rounded-xl border border-zinc-700/30">
+                        <div class="flex items-center gap-2">
+                            <span class="relative flex h-2.5 w-2.5">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
+                            </span>
+                            <span class="text-xs font-semibold text-emerald-400">Connected</span>
+                        </div>
+                        <div class="w-px h-6 bg-zinc-700/50"></div>
+                        <div class="flex items-center gap-2 text-xs text-zinc-400">
+                            <i class="fas fa-robot"></i>
+                            <span id="bot-count" class="font-bold text-zinc-200">0</span>
+                            <span>Akun</span>
+                        </div>
+                    </div>
+                    <button onclick="fetchBots()" class="bg-zinc-800/50 hover:bg-zinc-700/50 text-zinc-300 px-4 py-2 rounded-xl transition-all border border-zinc-700/30 hover:border-zinc-600/50 text-sm flex items-center gap-2">
+                        <i class="fas fa-sync-alt text-xs"></i>
+                        Refresh
+                    </button>
+                </div>
             </div>
         </div>
 
-        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl space-y-4">
-            <h2 class="text-lg font-bold text-zinc-300 tracking-wide">Daftar Akun Terdaftar:</h2>
-            <div id="bots-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <p class="text-zinc-500 text-sm italic col-span-full text-center py-4">Memuat data akun...</p>
+        <!-- Stats Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="glass-card rounded-2xl p-4 border border-zinc-800/30 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                    <i class="fas fa-circle text-emerald-400 text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-zinc-500 uppercase tracking-wider">Aktif</p>
+                    <p class="text-xl font-bold text-emerald-400" id="active-count">0</p>
+                </div>
             </div>
+            <div class="glass-card rounded-2xl p-4 border border-zinc-800/30 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-zinc-500/10 flex items-center justify-center">
+                    <i class="fas fa-circle text-zinc-500 text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-zinc-500 uppercase tracking-wider">Nonaktif</p>
+                    <p class="text-xl font-bold text-zinc-400" id="inactive-count">0</p>
+                </div>
+            </div>
+            <div class="glass-card rounded-2xl p-4 border border-zinc-800/30 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                    <i class="fas fa-clock text-amber-400 text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-zinc-500 uppercase tracking-wider">Last Update</p>
+                    <p class="text-sm font-mono text-zinc-300" id="last-update">-</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bots Grid -->
+        <div class="glass-card rounded-3xl p-6 md:p-8 border border-zinc-800/30">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-lg font-bold text-zinc-300 flex items-center gap-3">
+                    <i class="fas fa-users text-amber-500"></i>
+                    Daftar Akun Terdaftar
+                </h2>
+                <span class="text-xs bg-zinc-800/50 px-3 py-1 rounded-full text-zinc-400 border border-zinc-700/30">
+                    <i class="fas fa-sync-alt text-[10px] mr-1 animate-spin" id="live-indicator"></i>
+                    Live
+                </span>
+            </div>
+            
+            <div id="bots-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div class="col-span-full flex flex-col items-center justify-center py-12">
+                    <div class="w-12 h-12 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin"></div>
+                    <p class="text-zinc-500 text-sm mt-4">Memuat data akun...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-xs text-zinc-600 pt-4 footer-gradient py-4 rounded-2xl border border-zinc-800/20">
+            <i class="fas fa-shield-alt text-amber-500/30 mr-2"></i>
+            GemstonesHub Monitor Center v2.0
+            <span class="mx-2 text-zinc-700">•</span>
+            <i class="fas fa-code"></i> with <i class="fas fa-heart text-red-500/50 text-[10px]"></i>
         </div>
     </div>
 
     <script>
+        let lastUpdateTime = null;
+
         async function fetchBots() {
             try {
                 const response = await fetch('/api/users');
@@ -35,47 +309,125 @@
                 const container = document.getElementById('bots-container');
                 
                 if (!data.bots || data.bots.length === 0) {
-                    container.innerHTML = `<p class="text-zinc-500 text-sm italic col-span-full text-center py-4">Belum ada akun yang terdaftar.</p>`;
+                    container.innerHTML = `
+                        <div class="col-span-full flex flex-col items-center justify-center py-16">
+                            <div class="w-20 h-20 rounded-full bg-zinc-800/30 flex items-center justify-center mb-4">
+                                <i class="fas fa-inbox text-3xl text-zinc-600"></i>
+                            </div>
+                            <p class="text-zinc-500 text-sm">Belum ada akun yang terdaftar</p>
+                            <p class="text-zinc-600 text-xs mt-1">Tunggu hingga bot terhubung</p>
+                        </div>
+                    `;
+                    updateStats([]);
                     return;
                 }
 
                 const now = new Date();
+                lastUpdateTime = now;
+
+                let activeCount = 0;
 
                 container.innerHTML = data.bots.map(bot => {
                     const lastSeen = new Date(bot.last_seen);
                     const diffSeconds = Math.abs(now - lastSeen) / 1000;
-                    
-                    // Jika bot tidak mengirim polling lebih dari 15 detik, status = Nonaktif
                     const isActive = diffSeconds < 15;
+                    
+                    if (isActive) activeCount++;
 
                     const statusBadge = isActive 
-                        ? `<span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 uppercase font-bold">Aktif</span>`
-                        : `<span class="text-[10px] bg-zinc-800 text-zinc-500 px-2 py-0.5 rounded border border-zinc-700 uppercase font-bold">Nonaktif</span>`;
+                        ? `<span class="status-badge-active text-[10px] px-3 py-1 rounded-full uppercase font-bold flex items-center gap-1.5">
+                            <span class="relative flex h-1.5 w-1.5">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400"></span>
+                            </span>
+                            Aktif
+                        </span>`
+                        : `<span class="status-badge-inactive text-[10px] px-3 py-1 rounded-full uppercase font-bold flex items-center gap-1.5">
+                            <i class="fas fa-circle text-[6px]"></i>
+                            Nonaktif
+                        </span>`;
 
                     const actionButton = isActive
-                        ? `<button onclick="sendRespawn('${bot.username}', this)" class="w-full bg-red-600 hover:bg-red-500 active:scale-95 text-white font-bold text-xs py-2 px-3 rounded-lg transition-all shadow-md">🔴 Respawn Account</button>`
-                        : `<button disabled class="w-full bg-zinc-800 text-zinc-600 font-bold text-xs py-2 px-3 rounded-lg cursor-not-allowed">Offline</button>`;
+                        ? `<button onclick="sendRespawn('${bot.username}', this)" class="btn-respawn w-full text-white font-bold text-xs py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-red-500/10">
+                            <i class="fas fa-skull"></i>
+                            Respawn Account
+                        </button>`
+                        : `<button disabled class="btn-offline w-full text-zinc-500 font-bold text-xs py-2.5 px-3 rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
+                            <i class="fas fa-power-off"></i>
+                            Offline
+                        </button>`;
+
+                    const timeAgo = getTimeAgo(lastSeen);
 
                     return `
-                        <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 flex flex-col justify-between space-y-4 shadow-inner">
-                            <div class="flex items-center justify-between">
-                                <span class="font-bold text-zinc-200 truncate pr-2" title="${bot.username}">${bot.username}</span>
+                        <div class="bot-card rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-xl transition-all">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-user text-amber-400 text-xs"></i>
+                                        </div>
+                                        <span class="font-bold text-zinc-200 truncate" title="${bot.username}">${bot.username}</span>
+                                    </div>
+                                </div>
                                 ${statusBadge}
                             </div>
-                            <div class="text-[10px] text-zinc-500 font-mono">Seen: ${lastSeen.toLocaleTimeString()}</div>
+                            <div class="flex items-center justify-between text-[10px] text-zinc-500 font-mono">
+                                <span class="flex items-center gap-1.5">
+                                    <i class="fas fa-clock text-[8px]"></i>
+                                    ${timeAgo}
+                                </span>
+                                <span class="text-zinc-600">${lastSeen.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+                            </div>
                             ${actionButton}
                         </div>
                     `;
                 }).join('');
 
+                updateStats(data.bots, activeCount);
+                document.getElementById('last-update').textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
             } catch (err) {
                 console.error("Gagal memuat bot:", err);
+                document.getElementById('bots-container').innerHTML = `
+                    <div class="col-span-full flex flex-col items-center justify-center py-16">
+                        <div class="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center mb-4">
+                            <i class="fas fa-exclamation-triangle text-3xl text-red-400"></i>
+                        </div>
+                        <p class="text-red-400 text-sm font-medium">Gagal terhubung ke server</p>
+                        <p class="text-zinc-600 text-xs mt-1">Pastikan Flask berjalan</p>
+                        <button onclick="fetchBots()" class="mt-4 bg-zinc-800 hover:bg-zinc-700 px-6 py-2 rounded-xl text-sm transition-all">
+                            <i class="fas fa-redo mr-2"></i>Coba Lagi
+                        </button>
+                    </div>
+                `;
             }
         }
 
+        function updateStats(bots, activeCount) {
+            const total = bots?.length || 0;
+            const active = activeCount || 0;
+            const inactive = total - active;
+            
+            document.getElementById('bot-count').textContent = total;
+            document.getElementById('active-count').textContent = active;
+            document.getElementById('inactive-count').textContent = inactive;
+        }
+
+        function getTimeAgo(date) {
+            const diffSeconds = Math.floor((new Date() - date) / 1000);
+            
+            if (diffSeconds < 60) return `${diffSeconds} detik lalu`;
+            if (diffSeconds < 3600) return `${Math.floor(diffSeconds / 60)} menit lalu`;
+            if (diffSeconds < 86400) return `${Math.floor(diffSeconds / 3600)} jam lalu`;
+            return `${Math.floor(diffSeconds / 86400)} hari lalu`;
+        }
+
         async function sendRespawn(username, btn) {
-            btn.innerText = "Processing...";
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
             btn.disabled = true;
+            btn.className = "w-full bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/10";
 
             try {
                 const response = await fetch('/api/respawn', {
@@ -85,21 +437,32 @@
                 });
                 
                 if (response.ok) {
-                    btn.innerText = "🚀 Sent!";
-                    btn.className = "w-full bg-emerald-600 text-white font-bold text-xs py-2 px-3 rounded-lg transition-all";
-                    setTimeout(fetchBots, 1000);
+                    btn.innerHTML = '<i class="fas fa-check-circle"></i> Sent!';
+                    btn.className = "w-full bg-emerald-600 text-white font-bold text-xs py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10";
+                    setTimeout(fetchBots, 1500);
                 } else {
-                    alert("Gagal mengirim perintah.");
-                    fetchBots();
+                    btn.innerHTML = '<i class="fas fa-times-circle"></i> Failed';
+                    btn.className = "w-full bg-red-600 text-white font-bold text-xs py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2";
+                    setTimeout(fetchBots, 2000);
                 }
             } catch (err) {
-                alert("Error terhubung ke Flask.");
-                fetchBots();
+                btn.innerHTML = '<i class="fas fa-exclamation-circle"></i> Error';
+                btn.className = "w-full bg-red-600 text-white font-bold text-xs py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2";
+                setTimeout(fetchBots, 2000);
             }
         }
 
-        // Auto-refresh daftar dashboard setiap 4 detik
-        setInterval(fetchBots, 4000);
+        // Auto-refresh setiap 4 detik dengan animasi indikator
+        let refreshCount = 0;
+        setInterval(() => {
+            fetchBots();
+            const indicator = document.getElementById('live-indicator');
+            indicator.style.animation = 'none';
+            setTimeout(() => {
+                indicator.style.animation = 'spin 1s linear infinite';
+            }, 10);
+        }, 4000);
+        
         fetchBots();
     </script>
 </body>
