@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GemstonesHub Monitor Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen p-6 font-sans">
+
+    <div class="max-w-5xl mx-auto space-y-6">
+        <div class="flex justify-between items-center bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl">
+            <div>
+                <h1 class="text-3xl font-black tracking-wider text-amber-500 uppercase">GemstonesHub</h1>
+                <p class="text-sm text-zinc-400">Flask & Supabase Hybrid Control Panel</p>
+            </div>
+            <div class="text-xs bg-zinc-950 px-4 py-2 rounded-xl border border-zinc-800 font-mono text-zinc-400">
+                Status: <span class="text-emerald-400 font-bold">Connected</span>
+            </div>
+        </div>
+
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl space-y-4">
+            <h2 class="text-lg font-bold text-zinc-300 tracking-wide">Daftar Akun Terdaftar:</h2>
+            <div id="bots-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <p class="text-zinc-500 text-sm italic col-span-full text-center py-4">Memuat data akun...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchBots() {
+            try {
+                const response = await fetch('/api/users');
+                const data = await response.json();
+                const container = document.getElementById('bots-container');
+                
+                if (!data.bots || data.bots.length === 0) {
+                    container.innerHTML = `<p class="text-zinc-500 text-sm italic col-span-full text-center py-4">Belum ada akun yang terdaftar.</p>`;
+                    return;
+                }
+
+                const now = new Date();
+
+                container.innerHTML = data.bots.map(bot => {
+                    const lastSeen = new Date(bot.last_seen);
+                    const diffSeconds = Math.abs(now - lastSeen) / 1000;
+                    
+                    // Jika bot tidak mengirim polling lebih dari 15 detik, status = Nonaktif
+                    const isActive = diffSeconds < 15;
+
+                    const statusBadge = isActive 
+                        ? `<span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 uppercase font-bold">Aktif</span>`
+                        : `<span class="text-[10px] bg-zinc-800 text-zinc-500 px-2 py-0.5 rounded border border-zinc-700 uppercase font-bold">Nonaktif</span>`;
+
+                    const actionButton = isActive
+                        ? `<button onclick="sendRespawn('${bot.username}', this)" class="w-full bg-red-600 hover:bg-red-500 active:scale-95 text-white font-bold text-xs py-2 px-3 rounded-lg transition-all shadow-md">🔴 Respawn Account</button>`
+                        : `<button disabled class="w-full bg-zinc-800 text-zinc-600 font-bold text-xs py-2 px-3 rounded-lg cursor-not-allowed">Offline</button>`;
+
+                    return `
+                        <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 flex flex-col justify-between space-y-4 shadow-inner">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-zinc-200 truncate pr-2" title="${bot.username}">${bot.username}</span>
+                                ${statusBadge}
+                            </div>
+                            <div class="text-[10px] text-zinc-500 font-mono">Seen: ${lastSeen.toLocaleTimeString()}</div>
+                            ${actionButton}
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                console.error("Gagal memuat bot:", err);
+            }
+        }
+
+        async function sendRespawn(username, btn) {
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/respawn', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username })
+                });
+                
+                if (response.ok) {
+                    btn.innerText = "🚀 Sent!";
+                    btn.className = "w-full bg-emerald-600 text-white font-bold text-xs py-2 px-3 rounded-lg transition-all";
+                    setTimeout(fetchBots, 1000);
+                } else {
+                    alert("Gagal mengirim perintah.");
+                    fetchBots();
+                }
+            } catch (err) {
+                alert("Error terhubung ke Flask.");
+                fetchBots();
+            }
+        }
+
+        // Auto-refresh daftar dashboard setiap 4 detik
+        激setInterval(fetchBots, 4000);
+        fetchBots();
+    </script>
+</body>
+</html>
