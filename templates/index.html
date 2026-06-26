@@ -1,106 +1,277 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GemstonesHub Monitor Center</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GemstonesHub Monitor Center</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          display: ['Sora', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        },
+        colors: {
+          ink: { 950: '#0a0a0d', 900: '#13131a', 800: '#1a1a22', 700: '#26262f' },
+          topaz: { DEFAULT: '#f0a83c', dim: '#7a5a26' },
+          emerald: { DEFAULT: '#3ddc97', dim: '#1f5c43' },
+          ruby: { DEFAULT: '#f0496b', dim: '#7a2538' },
+        },
+        boxShadow: {
+          glow: '0 0 24px -4px rgba(240,168,60,0.35)',
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  body {
+    background-color: #0a0a0d;
+    background-image:
+      radial-gradient(circle at 12% 0%, rgba(240,168,60,0.10), transparent 40%),
+      radial-gradient(circle at 90% 15%, rgba(61,220,151,0.06), transparent 35%);
+    background-attachment: fixed;
+  }
+
+  /* Signature facet cut — echoes a cut gemstone edge */
+  .facet {
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 28px), calc(100% - 28px) 100%, 0 100%);
+  }
+  .facet-sm {
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+  }
+
+  @keyframes pulse-ring {
+    0%   { box-shadow: 0 0 0 0 rgba(61,220,151,0.55); }
+    70%  { box-shadow: 0 0 0 7px rgba(61,220,151,0); }
+    100% { box-shadow: 0 0 0 0 rgba(61,220,151,0); }
+  }
+  .pulse-dot { animation: pulse-ring 1.8s ease-out infinite; }
+
+  @keyframes shimmer {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 1; }
+  }
+  .gem-live { animation: shimmer 2.4s ease-in-out infinite; }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: #26262f; border-radius: 8px; }
+
+  .card-enter { animation: rise 0.35s ease both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 </head>
-<body class="bg-zinc-950 text-zinc-100 min-h-screen p-6 font-sans">
 
-    <div class="max-w-5xl mx-auto space-y-6">
-        <div class="flex justify-between items-center bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl">
-            <div>
-                <h1 class="text-3xl font-black tracking-wider text-amber-500 uppercase">GemstonesHub</h1>
-                <p class="text-sm text-zinc-400">Flask & Supabase Hybrid Control Panel</p>
-            </div>
-            <div class="text-xs bg-zinc-950 px-4 py-2 rounded-xl border border-zinc-800 font-mono text-zinc-400">
-                Status: <span class="text-emerald-400 font-bold">Connected</span>
-            </div>
+<body class="text-zinc-100 min-h-screen p-4 sm:p-6 font-sans">
+
+  <div class="max-w-6xl mx-auto space-y-6">
+
+    <!-- Header -->
+    <div class="facet bg-ink-900 border border-ink-700 p-6 sm:p-7 shadow-2xl relative overflow-hidden">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-topaz/10 border border-topaz/30 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-gem text-topaz text-xl gem-live"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-display font-extrabold tracking-wide text-topaz uppercase leading-tight">GemstonesHub</h1>
+            <p class="text-xs sm:text-sm text-zinc-400 font-medium">Flask &amp; Supabase Hybrid Control Panel</p>
+          </div>
         </div>
 
-        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl space-y-4">
-            <h2 class="text-lg font-bold text-zinc-300 tracking-wide">Daftar Akun Terdaftar:</h2>
-            <div id="bots-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <p class="text-zinc-500 text-sm italic col-span-full text-center py-4">Memuat data akun...</p>
-            </div>
+        <div class="flex items-center gap-2 bg-ink-950 border border-ink-700 rounded-xl px-4 py-2.5 self-start sm:self-auto">
+          <span class="relative flex h-2.5 w-2.5">
+            <span class="absolute inline-flex h-full w-full rounded-full bg-emerald pulse-dot"></span>
+            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald"></span>
+          </span>
+          <span class="text-xs font-mono text-zinc-400">Status:</span>
+          <span class="text-xs font-mono font-bold text-emerald">Connected</span>
         </div>
+      </div>
     </div>
 
-    <script>
-        async function fetchBots() {
-            try {
-                const response = await fetch('/api/users');
-                const data = await response.json();
-                const container = document.getElementById('bots-container');
-                
-                if (!data.bots || data.bots.length === 0) {
-                    container.innerHTML = `<p class="text-zinc-500 text-sm italic col-span-full text-center py-4">Belum ada akun yang terdaftar.</p>`;
-                    return;
-                }
+    <!-- Stats -->
+    <div class="grid grid-cols-3 gap-3 sm:gap-4">
+      <div class="bg-ink-900 border border-ink-700 rounded-2xl p-4 sm:p-5 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-zinc-500/10 border border-zinc-600/30 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-cubes text-zinc-400"></i>
+        </div>
+        <div class="min-w-0">
+          <p id="stat-total" class="text-xl sm:text-2xl font-display font-bold text-zinc-100">0</p>
+          <p class="text-[11px] sm:text-xs text-zinc-500 uppercase tracking-wide truncate">Total Akun</p>
+        </div>
+      </div>
+      <div class="bg-ink-900 border border-ink-700 rounded-2xl p-4 sm:p-5 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-emerald/10 border border-emerald/30 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-bolt text-emerald"></i>
+        </div>
+        <div class="min-w-0">
+          <p id="stat-active" class="text-xl sm:text-2xl font-display font-bold text-emerald">0</p>
+          <p class="text-[11px] sm:text-xs text-zinc-500 uppercase tracking-wide truncate">Aktif</p>
+        </div>
+      </div>
+      <div class="bg-ink-900 border border-ink-700 rounded-2xl p-4 sm:p-5 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-ink-700 border border-ink-700 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-moon text-zinc-500"></i>
+        </div>
+        <div class="min-w-0">
+          <p id="stat-offline" class="text-xl sm:text-2xl font-display font-bold text-zinc-400">0</p>
+          <p class="text-[11px] sm:text-xs text-zinc-500 uppercase tracking-wide truncate">Nonaktif</p>
+        </div>
+      </div>
+    </div>
 
-                const now = new Date();
+    <!-- Accounts -->
+    <div class="bg-ink-900 border border-ink-700 rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base sm:text-lg font-display font-bold text-zinc-300 tracking-wide flex items-center gap-2">
+          <i class="fa-solid fa-layer-group text-topaz text-sm"></i>
+          Daftar Akun Terdaftar
+        </h2>
+        <span id="last-update" class="text-[11px] font-mono text-zinc-600"></span>
+      </div>
 
-                container.innerHTML = data.bots.map(bot => {
-                    const lastSeen = new Date(bot.last_seen);
-                    const diffSeconds = Math.abs(now - lastSeen) / 1000;
-                    
-                    // Jika bot tidak mengirim polling lebih dari 15 detik, status = Nonaktif
-                    const isActive = diffSeconds < 15;
+      <div id="bots-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div class="col-span-full flex flex-col items-center justify-center gap-3 py-10 text-zinc-500">
+          <i class="fa-solid fa-spinner fa-spin text-2xl text-topaz"></i>
+          <p class="text-sm italic">Memuat data akun...</p>
+        </div>
+      </div>
+    </div>
 
-                    const statusBadge = isActive 
-                        ? `<span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 uppercase font-bold">Aktif</span>`
-                        : `<span class="text-[10px] bg-zinc-800 text-zinc-500 px-2 py-0.5 rounded border border-zinc-700 uppercase font-bold">Nonaktif</span>`;
+    <p class="text-center text-[11px] text-zinc-600 font-mono flex items-center justify-center gap-1.5 pb-2">
+      <i class="fa-solid fa-arrows-rotate"></i>
+      Auto-refresh setiap 4 detik
+    </p>
+  </div>
 
-                    const actionButton = isActive
-                        ? `<button onclick="sendRespawn('${bot.username}', this)" class="w-full bg-red-600 hover:bg-red-500 active:scale-95 text-white font-bold text-xs py-2 px-3 rounded-lg transition-all shadow-md">🔴 Respawn Account</button>`
-                        : `<button disabled class="w-full bg-zinc-800 text-zinc-600 font-bold text-xs py-2 px-3 rounded-lg cursor-not-allowed">Offline</button>`;
+  <script>
+    function timeAgo(seconds) {
+      if (seconds < 60) return `${Math.floor(seconds)}d lalu`;
+      if (seconds < 3600) return `${Math.floor(seconds / 60)}m lalu`;
+      return `${Math.floor(seconds / 3600)}j lalu`;
+    }
 
-                    return `
-                        <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 flex flex-col justify-between space-y-4 shadow-inner">
-                            <div class="flex items-center justify-between">
-                                <span class="font-bold text-zinc-200 truncate pr-2" title="${bot.username}">${bot.username}</span>
-                                ${statusBadge}
-                            </div>
-                            <div class="text-[10px] text-zinc-500 font-mono">Seen: ${lastSeen.toLocaleTimeString()}</div>
-                            ${actionButton}
-                        </div>
-                    `;
-                }).join('');
+    async function fetchBots() {
+      try {
+        const response = await fetch('/api/users');
+        const data = await response.json();
+        const container = document.getElementById('bots-container');
+        const lastUpdateEl = document.getElementById('last-update');
 
-            } catch (err) {
-                console.error("Gagal memuat bot:", err);
-            }
+        if (!data.bots || data.bots.length === 0) {
+          container.innerHTML = `
+            <div class="col-span-full flex flex-col items-center justify-center gap-3 py-10 text-zinc-500">
+              <i class="fa-solid fa-ghost text-3xl text-zinc-600"></i>
+              <p class="text-sm italic">Belum ada akun yang terdaftar.</p>
+            </div>`;
+          document.getElementById('stat-total').textContent = '0';
+          document.getElementById('stat-active').textContent = '0';
+          document.getElementById('stat-offline').textContent = '0';
+          return;
         }
 
-        async function sendRespawn(username, btn) {
-            btn.innerText = "Processing...";
-            btn.disabled = true;
+        const now = new Date();
+        let activeCount = 0;
 
-            try {
-                const response = await fetch('/api/respawn', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: username })
-                });
-                
-                if (response.ok) {
-                    btn.innerText = "🚀 Sent!";
-                    btn.className = "w-full bg-emerald-600 text-white font-bold text-xs py-2 px-3 rounded-lg transition-all";
-                    setTimeout(fetchBots, 1000);
-                } else {
-                    alert("Gagal mengirim perintah.");
-                    fetchBots();
-                }
-            } catch (err) {
-                alert("Error terhubung ke Flask.");
-                fetchBots();
-            }
+        const cards = data.bots.map((bot, i) => {
+          const lastSeen = new Date(bot.last_seen);
+          const diffSeconds = Math.abs(now - lastSeen) / 1000;
+          const isActive = diffSeconds < 15;
+          if (isActive) activeCount++;
+
+          const accentBorder = isActive ? 'border-l-emerald' : 'border-l-ink-700';
+
+          const statusBadge = isActive
+            ? `<span class="flex items-center gap-1.5 text-[10px] bg-emerald/10 text-emerald px-2 py-0.5 rounded-md border border-emerald/30 uppercase font-bold">
+                 <i class="fa-solid fa-circle text-[6px]"></i> Aktif
+               </span>`
+            : `<span class="flex items-center gap-1.5 text-[10px] bg-ink-800 text-zinc-500 px-2 py-0.5 rounded-md border border-ink-700 uppercase font-bold">
+                 <i class="fa-solid fa-circle text-[6px]"></i> Nonaktif
+               </span>`;
+
+          const actionButton = isActive
+            ? `<button onclick="sendRespawn('${bot.username}', this)"
+                 class="w-full flex items-center justify-center gap-2 bg-ruby/90 hover:bg-ruby active:scale-95 text-white font-bold text-xs py-2.5 px-3 rounded-lg transition-all shadow-md shadow-ruby/20">
+                 <i class="fa-solid fa-rotate-right"></i> Respawn Account
+               </button>`
+            : `<button disabled
+                 class="w-full flex items-center justify-center gap-2 bg-ink-800 text-zinc-600 font-bold text-xs py-2.5 px-3 rounded-lg cursor-not-allowed">
+                 <i class="fa-solid fa-power-off"></i> Offline
+               </button>`;
+
+          return `
+            <div class="card-enter bg-ink-950 border border-ink-700 ${accentBorder} border-l-2 rounded-xl p-4 flex flex-col justify-between gap-4 shadow-inner" style="animation-delay:${i * 35}ms">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2 min-w-0">
+                  <div class="w-8 h-8 rounded-lg bg-ink-800 border border-ink-700 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-robot text-zinc-400 text-xs"></i>
+                  </div>
+                  <span class="font-bold text-zinc-200 text-sm truncate" title="${bot.username}">${bot.username}</span>
+                </div>
+                ${statusBadge}
+              </div>
+              <div class="text-[10px] text-zinc-500 font-mono flex items-center gap-1.5">
+                <i class="fa-regular fa-clock"></i>
+                ${lastSeen.toLocaleTimeString()} &middot; ${timeAgo(diffSeconds)}
+              </div>
+              ${actionButton}
+            </div>
+          `;
+        }).join('');
+
+        container.innerHTML = cards;
+        document.getElementById('stat-total').textContent = data.bots.length;
+        document.getElementById('stat-active').textContent = activeCount;
+        document.getElementById('stat-offline').textContent = data.bots.length - activeCount;
+        lastUpdateEl.innerHTML = `<i class="fa-regular fa-clock mr-1"></i>${now.toLocaleTimeString()}`;
+
+      } catch (err) {
+        console.error("Gagal memuat bot:", err);
+        const container = document.getElementById('bots-container');
+        container.innerHTML = `
+          <div class="col-span-full flex flex-col items-center justify-center gap-3 py-10 text-ruby">
+            <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+            <p class="text-sm italic">Gagal memuat data. Mencoba lagi...</p>
+          </div>`;
+      }
+    }
+
+    async function sendRespawn(username, btn) {
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing...`;
+      btn.disabled = true;
+
+      try {
+        const response = await fetch('/api/respawn', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: username })
+        });
+
+        if (response.ok) {
+          btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sent!`;
+          btn.className = "w-full flex items-center justify-center gap-2 bg-emerald text-white font-bold text-xs py-2.5 px-3 rounded-lg transition-all";
+          setTimeout(fetchBots, 1000);
+        } else {
+          alert("Gagal mengirim perintah.");
+          fetchBots();
         }
-
-        // Auto-refresh daftar dashboard setiap 4 detik
-        setInterval(fetchBots, 4000);
+      } catch (err) {
+        alert("Error terhubung ke Flask.");
         fetchBots();
-    </script>
+      }
+    }
+
+    setInterval(fetchBots, 4000);
+    fetchBots();
+  </script>
 </body>
 </html>
